@@ -1,28 +1,66 @@
 using System.Threading.Tasks;
-using RawRabbit;
-using RawRabbit.Enrichers.MessageContext;
-using Infrastructure.Types;
-using Infrastructure.Types.Messages;
+using RabbitMQ.Client;
+using Newtonsoft.Json;
+using Bijector.Infrastructure.Types;
+using Bijector.Infrastructure.Types.Messages;
+using System.Text;
+using Microsoft.Extensions.Options;
 
-namespace Infrastructure.Queues
+namespace Bijector.Infrastructure.Queues
 {
     public class RabbitMQPublisher : IPublisher
     {   
-        private IBusClient client;
+        private readonly IConnection connection;
 
-        public RabbitMQPublisher(IBusClient client)
+        private readonly INameResolver nameResolver;
+
+        private readonly IOptions<RabbitMQOptions> options;
+
+        public RabbitMQPublisher(IConnection connection, INameResolver nameResolver, IOptions<RabbitMQOptions> options)
         {
-            this.client = client;
+            this.connection = connection;
+            this.nameResolver = nameResolver;
+            this.options = options;
         }
 
         public async Task Publish<TEvent>(TEvent @event, IContext context) where TEvent : IEvent
         {
-            await client.PublishAsync(@event, (context) => context.UseMessageContext(context));
+            using (var channel = connection.CreateModel())
+            {
+                string exchange = nameResolver.GetExchangeName<TEvent>(context);
+                string rootingKey = nameResolver.GetRoutingKey<TEvent>();
+                channel.ExchangeDeclare(exchange, options.Value.ExchangeType, options.Value.IsExchangeDurable,
+                                        options.Value.IsExchangeAutoDelete);
+                
+                var message = new RabbitMQMessage<TEvent>(@event, context);
+                var json = JsonConvert.SerializeObject(message);
+                var body = Encoding.UTF8.GetBytes(json);
+
+                await Task.Factory.StartNew(() =>
+                {
+                    channel.BasicPublish(exchange, rootingKey, channel.CreateBasicProperties(), body);
+                });
+            }
         }
 
         public async Task Send<TCommand>(TCommand command, IContext context) where TCommand : ICommand
         {
-            await client.PublishAsync(command, (context) => context.UseMessageContext(context));
+            using (var channel = connection.CreateModel())
+            {
+                string exchange = nameResolver.GetExchangeName<TCommand>(context);
+                string rootingKey = nameResolver.GetRoutingKey<TCommand>();
+                channel.ExchangeDeclare(exchange, options.Value.ExchangeType, options.Value.IsExchangeDurable,
+                                        options.Value.IsExchangeAutoDelete);
+                
+                var message = new RabbitMQMessage<TCommand>(command, context);
+                var json = JsonConvert.SerializeObject(message);
+                var body = Encoding.UTF8.GetBytes(json);
+
+                await Task.Factory.StartNew(() =>
+                {
+                    channel.BasicPublish(exchange, rootingKey, channel.CreateBasicProperties(), body);
+                });
+            }
         }
     }
 }
