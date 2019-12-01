@@ -14,13 +14,13 @@ namespace Bijector.Infrastructure.Queues
 
         private readonly INameResolver nameResolver;
 
-        private readonly IOptions<RabbitMQOptions> options;
+        private readonly RabbitMQOptions options;
 
         public RabbitMQPublisher(IConnection connection, INameResolver nameResolver, IOptions<RabbitMQOptions> options)
         {
             this.connection = connection;
             this.nameResolver = nameResolver;
-            this.options = options;
+            this.options = options.Value;
         }
 
         public async Task Publish<TEvent>(TEvent @event, IContext context) where TEvent : IEvent
@@ -29,8 +29,8 @@ namespace Bijector.Infrastructure.Queues
             {
                 string exchange = nameResolver.GetExchangeName<TEvent>(context);
                 string rootingKey = nameResolver.GetRoutingKey<TEvent>();
-                channel.ExchangeDeclare(exchange, options.Value.ExchangeType, options.Value.IsExchangeDurable,
-                                        options.Value.IsExchangeAutoDelete);
+                channel.ExchangeDeclare(exchange, options.ExchangeType, options.IsExchangeDurable,
+                                        options.IsExchangeAutoDelete);
                 
                 var message = new RabbitMQMessage<TEvent>(@event, context);
                 var json = JsonConvert.SerializeObject(message);
@@ -49,8 +49,8 @@ namespace Bijector.Infrastructure.Queues
             {
                 string exchange = nameResolver.GetExchangeName<TCommand>(context);
                 string rootingKey = nameResolver.GetRoutingKey<TCommand>();
-                channel.ExchangeDeclare(exchange, options.Value.ExchangeType, options.Value.IsExchangeDurable,
-                                        options.Value.IsExchangeAutoDelete);
+                channel.ExchangeDeclare(exchange, options.ExchangeType, options.IsExchangeDurable,
+                                        options.IsExchangeAutoDelete);
                 
                 var message = new RabbitMQMessage<TCommand>(command, context);
                 var json = JsonConvert.SerializeObject(message);
