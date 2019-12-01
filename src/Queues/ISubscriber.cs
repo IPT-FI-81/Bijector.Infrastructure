@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
-using Infrastructure.Types.Messages;
+using Bijector.Infrastructure.Types.Messages;
 
-namespace Infrastructure.Queues
+namespace Bijector.Infrastructure.Queues
 {
     public interface ISubscriber
     {

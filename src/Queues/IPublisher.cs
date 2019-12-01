@@ -1,8 +1,8 @@
 using System.Threading.Tasks;
-using Infrastructure.Types;
-using Infrastructure.Types.Messages;
+using Bijector.Infrastructure.Types;
+using Bijector.Infrastructure.Types.Messages;
 
-namespace Infrastructure.Queues
+namespace Bijector.Infrastructure.Queues
 {
     public interface IPublisher
     {
