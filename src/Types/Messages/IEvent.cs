@@ -1,4 +1,4 @@
-namespace Infrastructure.Types.Messages
+namespace Bijector.Infrastructure.Types.Messages
 {
     public interface IEvent
     {

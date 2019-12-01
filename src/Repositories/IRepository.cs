@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System;
-using Infrastructure.Types;
+using Bijector.Infrastructure.Types;
 
-namespace Infrastructure.Repositories
+namespace Bijector.Infrastructure.Repositories
 {
     public interface IRepository<T> where T : IIdentifiable
     {

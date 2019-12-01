@@ -1,6 +1,6 @@
 using System;
 
-namespace Infrastructure.Types
+namespace Bijector.Infrastructure.Types
 {
     public interface IContext
     {
