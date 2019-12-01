@@ -5,10 +5,10 @@ namespace Bijector.Infrastructure.Queues
 {
     public interface ISubscriber
     {
-        ISubscriber SubscribeCommand<TCommand>(string queueName = null) 
+        ISubscriber SubscribeCommand<TCommand>(string routingKey = null) 
                         where TCommand : ICommand;
 
-        ISubscriber SubscribeEvent<TEvent>(string queueName = null)
+        ISubscriber SubscribeEvent<TEvent>(string routingKey = null)
                         where TEvent : IEvent;
     }
 }

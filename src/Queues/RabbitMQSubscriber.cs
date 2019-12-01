@@ -32,7 +32,7 @@ namespace Bijector.Infrastructure.Queues
         public ISubscriber SubscribeCommand<TCommand>(string routingKey = null) where TCommand : ICommand
         {
             var channel = connection.CreateModel();
-            string exchange = nameResolver.GetExchangeName<TCommand>(null);
+            string exchange = nameResolver.GetExchangeSourceName<TCommand>();
             string bindingKey = string.IsNullOrWhiteSpace(routingKey) ? 
                                 nameResolver.GetRoutingKey<TCommand>() : routingKey;
 
@@ -57,7 +57,7 @@ namespace Bijector.Infrastructure.Queues
         public ISubscriber SubscribeEvent<TEvent>(string routingKey = null) where TEvent : IEvent
         {
             var channel = connection.CreateModel();
-            string exchange = nameResolver.GetExchangeName<TEvent>(null);
+            string exchange = nameResolver.GetExchangeSourceName<TEvent>();
             string bindingKey = string.IsNullOrWhiteSpace(routingKey) ? 
                                 nameResolver.GetRoutingKey<TEvent>() : routingKey;
             channel.ExchangeDeclare(exchange, options.ExchangeType);

@@ -27,7 +27,7 @@ namespace Bijector.Infrastructure.Queues
         {
             using (var channel = connection.CreateModel())
             {
-                string exchange = nameResolver.GetExchangeName<TEvent>(context);
+                string exchange = nameResolver.GetExchangeDestinationName<TEvent>(context);
                 string rootingKey = nameResolver.GetRoutingKey<TEvent>();
                 channel.ExchangeDeclare(exchange, options.ExchangeType, options.IsExchangeDurable,
                                         options.IsExchangeAutoDelete);
@@ -47,7 +47,7 @@ namespace Bijector.Infrastructure.Queues
         {
             using (var channel = connection.CreateModel())
             {
-                string exchange = nameResolver.GetExchangeName<TCommand>(context);
+                string exchange = nameResolver.GetExchangeDestinationName<TCommand>(context);
                 string rootingKey = nameResolver.GetRoutingKey<TCommand>();
                 channel.ExchangeDeclare(exchange, options.ExchangeType, options.IsExchangeDurable,
                                         options.IsExchangeAutoDelete);

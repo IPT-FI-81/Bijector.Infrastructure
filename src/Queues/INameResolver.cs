@@ -5,7 +5,9 @@ namespace Bijector.Infrastructure.Queues
 {
     public interface INameResolver
     {
-        string GetExchangeName<T>(IContext context);
+        string GetExchangeDestinationName<T>(IContext context);
+
+        string GetExchangeSourceName<T>();
 
         string GetRoutingKey<T>();
     }
