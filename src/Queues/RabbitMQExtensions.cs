@@ -7,9 +7,19 @@ namespace Bijector.Infrastructure.Queues
 {
     public static class RabbitMQExtensions
     {
-        public static void AddRabbitMQ(this IServiceCollection services, IConfiguration configuration)
+        public static void AddRabbitMQ(this IServiceCollection services, IConfiguration configuration, INameResolver nameResolver = null)
         {                        
             services.Configure<RabbitMQOptions>(configuration);
+
+            if(nameResolver == null)
+            {
+                services.AddSingleton<INameResolver, BaseNameResolver>();
+            }
+            else 
+            {
+                services.AddSingleton<INameResolver>(nameResolver);
+            }
+
 
             var options = configuration.GetValue(typeof(RabbitMQOptions), "RabbitMQOptions") as RabbitMQOptions;
             var factory = new ConnectionFactory();
