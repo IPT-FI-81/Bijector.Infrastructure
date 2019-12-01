@@ -12,19 +12,19 @@ namespace Bijector.Infrastructure.Queues
 
         public string UserName { get; set; }
 
-        public TimeSpan NetworkRecoveryInterval{ get; set; }
+        public TimeSpan? NetworkRecoveryInterval{ get; set; }
  
-        public int Port { get; set; }
+        public int? Port { get; set; }
 
-        public int RequestedConnectionTimeout { get; set; }
+        public int? RequestedConnectionTimeout { get; set; }
 
-        public int SocketReadTimeout { get; set; }
+        public int? SocketReadTimeout { get; set; }
 
-        public int SocketWriteTimeout { get; set; }
+        public int? SocketWriteTimeout { get; set; }
 
-        public bool IsAutomaticRecoveryEnabled { get; set; }
+        public bool? IsAutomaticRecoveryEnabled { get; set; }
 
-        public bool IsTopologyRecoveryEnabled { get; set; }
+        public bool? IsTopologyRecoveryEnabled { get; set; }
 
         public string ExchangeType { get; set; }
 
