@@ -53,7 +53,7 @@ namespace Bijector.Infrastructure.Queues
             services.AddTransient<IPublisher, RabbitMQPublisher>();
         }
 
-        public static ISubscriber UseRabbitMQ(IApplicationBuilder builder)
+        public static ISubscriber UseRabbitMQ(this IApplicationBuilder builder)
         {
             return new RabbitMQSubscriber(builder);
         }
