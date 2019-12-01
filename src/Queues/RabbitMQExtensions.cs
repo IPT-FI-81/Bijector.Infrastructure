@@ -1,3 +1,4 @@
+using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,7 +10,7 @@ namespace Bijector.Infrastructure.Queues
     {
         public static void AddRabbitMQ(this IServiceCollection services, IConfiguration configuration, INameResolver nameResolver = null)
         {                        
-            services.Configure<RabbitMQOptions>(configuration);
+            services.Configure<RabbitMQOptions>(configuration.GetSection("RabbitMQOptions"));
 
             if(nameResolver == null)
             {
@@ -21,7 +22,8 @@ namespace Bijector.Infrastructure.Queues
             }
 
 
-            var options = configuration.GetValue(typeof(RabbitMQOptions), "RabbitMQOptions") as RabbitMQOptions;
+            var options = new RabbitMQOptions();
+            configuration.GetSection("RabbitMQOptions").Bind(options);
             var factory = new ConnectionFactory();
             factory.HostName = options.HostName;
             factory.UserName = options.UserName;
@@ -43,19 +45,17 @@ namespace Bijector.Infrastructure.Queues
                 factory.SocketReadTimeout = options.SocketReadTimeout.Value;
             if(options.SocketWriteTimeout.HasValue)
                 factory.SocketWriteTimeout = options.SocketWriteTimeout.Value;
-            if(string.IsNullOrEmpty(options.ExchangeType))
-                options.ExchangeType = "topic";
 
             var connection = factory.CreateConnection();
 
-            services.AddSingleton<IConnection>(connection);
-            services.AddTransient<ISubscriber, RabbitMQSubscriber>();
+            services.AddSingleton<IConnection>(connection);            
             services.AddTransient<IPublisher, RabbitMQPublisher>();
+            services.AddTransient<ISubscriber, RabbitMQSubscriber>();
         }
 
         public static ISubscriber UseRabbitMQ(this IApplicationBuilder builder)
         {
-            return new RabbitMQSubscriber(builder);
+            return new RabbitMQSubscriber(builder.ApplicationServices.GetRequiredService<IServiceProvider>());
         }
 
     }

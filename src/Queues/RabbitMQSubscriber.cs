@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,7 +8,7 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using Bijector.Infrastructure.Types.Messages;
 using Bijector.Infrastructure.Handlers;
-using System.Text;
+using Bijector.Infrastructure.Types;
 
 namespace Bijector.Infrastructure.Queues
 {
@@ -21,9 +22,9 @@ namespace Bijector.Infrastructure.Queues
 
         private readonly INameResolver nameResolver;
 
-        public RabbitMQSubscriber(IApplicationBuilder builder)
-        {                                
-            this.services = builder.ApplicationServices.GetRequiredService<IServiceProvider>();
+        public RabbitMQSubscriber(IServiceProvider services)
+        {
+            this.services = services;
             connection = services.GetService<IConnection>();
             options  = services.GetService<IOptions<RabbitMQOptions>>().Value;
             nameResolver = services.GetService<INameResolver>();
@@ -36,7 +37,7 @@ namespace Bijector.Infrastructure.Queues
             string bindingKey = string.IsNullOrWhiteSpace(routingKey) ? 
                                 nameResolver.GetRoutingKey<TCommand>() : routingKey;
 
-            channel.ExchangeDeclare(exchange, options.ExchangeType);
+            channel.ExchangeDeclare(exchange, options.ExchangeType, options.IsExchangeDurable, options.IsExchangeAutoDelete);
             var queueName = channel.QueueDeclare().QueueName;
             channel.QueueBind(queueName, exchange, bindingKey);
             
@@ -44,7 +45,7 @@ namespace Bijector.Infrastructure.Queues
             consumer.Received += async (model, ea) => 
             {
                 var json = Encoding.UTF8.GetString(ea.Body);
-                var message = JsonConvert.DeserializeObject<RabbitMQMessage<TCommand>>(json);
+                var message = JsonConvert.DeserializeObject<RabbitMQMessage<TCommand>>(json, new BaseContextJsonConverter());
                 var handler = services.GetService<ICommandHandler<TCommand>>();
                 await handler.Handle(message.Content, message.Context);   
             };
@@ -60,7 +61,7 @@ namespace Bijector.Infrastructure.Queues
             string exchange = nameResolver.GetExchangeSourceName<TEvent>();
             string bindingKey = string.IsNullOrWhiteSpace(routingKey) ? 
                                 nameResolver.GetRoutingKey<TEvent>() : routingKey;
-            channel.ExchangeDeclare(exchange, options.ExchangeType);
+            channel.ExchangeDeclare(exchange, options.ExchangeType, options.IsExchangeDurable, options.IsExchangeAutoDelete);
             
             var queueName = channel.QueueDeclare().QueueName;
             channel.QueueBind(queueName, exchange, bindingKey);
@@ -69,7 +70,7 @@ namespace Bijector.Infrastructure.Queues
             consumer.Received += async (model, ea) => 
             {
                 var json = Encoding.UTF8.GetString(ea.Body);
-                var message = JsonConvert.DeserializeObject<RabbitMQMessage<TEvent>>(json);
+                var message = JsonConvert.DeserializeObject<RabbitMQMessage<TEvent>>(json, new BaseContextJsonConverter());
                 var handler = services.GetService<IEventHandler<TEvent>>();
                 await handler.Handle(message.Content, message.Context);   
             };
