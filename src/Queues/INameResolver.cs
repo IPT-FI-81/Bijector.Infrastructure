@@ -1,5 +1,4 @@
 using Bijector.Infrastructure.Types;
-using Bijector.Infrastructure.Types.Messages;
 
 namespace Bijector.Infrastructure.Queues
 {
