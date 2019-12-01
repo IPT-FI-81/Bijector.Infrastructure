@@ -6,10 +6,12 @@ namespace Bijector.Infrastructure.Types
     {
         Guid Id { get; }
 
-        Guid UserId { get; }
+        Guid UserId { get; }        
 
         string ResourceFrom { get; }
 
         string ResourceTo { get; }
+
+        DateTimeOffset CreatedTime { get; }
     }
 }
