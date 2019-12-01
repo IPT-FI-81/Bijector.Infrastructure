@@ -1,42 +1,82 @@
 using System;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Options;
 using Microsoft.Extensions.DependencyInjection;
-using RawRabbit;
-using Infrastructure.Types;
-using Infrastructure.Types.Messages;
-using Infrastructure.Handlers;
+using Newtonsoft.Json;
+using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
+using Bijector.Infrastructure.Types.Messages;
+using Bijector.Infrastructure.Handlers;
+using System.Text;
 
-namespace Infrastructure.Queues
+namespace Bijector.Infrastructure.Queues
 {
     public class RabbitMQSubscriber : ISubscriber
     {
-        private IServiceProvider services;
+        private readonly IServiceProvider services;
 
-        private IBusClient client;
+        private readonly IConnection connection;
+
+        private readonly RabbitMQOptions options;
+
+        private readonly INameResolver nameResolver;
 
         public RabbitMQSubscriber(IApplicationBuilder builder)
-        {
+        {                                
             this.services = builder.ApplicationServices.GetRequiredService<IServiceProvider>();
-            client = services.GetService<IBusClient>();
+            connection = services.GetService<IConnection>();
+            options  = services.GetService<IOptions<RabbitMQOptions>>().Value;
+            nameResolver = services.GetService<INameResolver>();
         }
 
-        public async Task SubscribeCommand<TCommand>(string queueName = null) where TCommand : ICommand
+        public ISubscriber SubscribeCommand<TCommand>(string routingKey = null) where TCommand : ICommand
         {
-            await client.SubscribeAsync<TCommand, IContext>(async (command, context) =>
+            var channel = connection.CreateModel();
+            string exchange = nameResolver.GetExchangeName<TCommand>(null);
+            string bindingKey = string.IsNullOrWhiteSpace(routingKey) ? 
+                                nameResolver.GetRoutingKey<TCommand>() : routingKey;
+
+            channel.ExchangeDeclare(exchange, options.ExchangeType);
+            var queueName = channel.QueueDeclare().QueueName;
+            channel.QueueBind(queueName, exchange, bindingKey);
+            
+            var consumer = new EventingBasicConsumer(channel);
+            consumer.Received += async (model, ea) => 
             {
+                var json = Encoding.UTF8.GetString(ea.Body);
+                var message = JsonConvert.DeserializeObject<RabbitMQMessage<TCommand>>(json);
                 var handler = services.GetService<ICommandHandler<TCommand>>();
-                await handler.Handle(command, context);
-            });
+                await handler.Handle(message.Content, message.Context);   
+            };
+            
+            channel.BasicConsume(queueName, true, consumer);
+            
+            return this;
         }
 
-        public async Task SubscribeEvent<TEvent>(string queueName = null) where TEvent : IEvent
+        public ISubscriber SubscribeEvent<TEvent>(string routingKey = null) where TEvent : IEvent
         {
-            await client.SubscribeAsync<TEvent, IContext>(async (@event, context) =>
+            var channel = connection.CreateModel();
+            string exchange = nameResolver.GetExchangeName<TEvent>(null);
+            string bindingKey = string.IsNullOrWhiteSpace(routingKey) ? 
+                                nameResolver.GetRoutingKey<TEvent>() : routingKey;
+            channel.ExchangeDeclare(exchange, options.ExchangeType);
+            
+            var queueName = channel.QueueDeclare().QueueName;
+            channel.QueueBind(queueName, exchange, bindingKey);
+            
+            var consumer = new EventingBasicConsumer(channel);
+            consumer.Received += async (model, ea) => 
             {
+                var json = Encoding.UTF8.GetString(ea.Body);
+                var message = JsonConvert.DeserializeObject<RabbitMQMessage<TEvent>>(json);
                 var handler = services.GetService<IEventHandler<TEvent>>();
-                await handler.Handle(@event, context);
-            });
+                await handler.Handle(message.Content, message.Context);   
+            };
+                
+            channel.BasicConsume(queueName, true, consumer);
+            
+            return this;
         }
     }
 }
