@@ -21,7 +21,7 @@ namespace Bijector.Infrastructure.Dispatchers
                 .MakeGenericType(query.GetType(), typeof(TResponse));
 
             dynamic handler = services.GetService(handlerType);
-            return await handler.Handle(query);
+            return await handler.Handle(query, context);
         }
     }
 }
