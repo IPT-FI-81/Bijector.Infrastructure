@@ -5,7 +5,7 @@ namespace Bijector.Infrastructure.Types.Messages
         
     }
 
-    public interface IQuery<TResponse>
+    public interface IQuery<TResponse> : IQuery
     {
 
     }
