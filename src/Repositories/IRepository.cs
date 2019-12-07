@@ -1,6 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using System;
+using System.Linq.Expressions;
 using Bijector.Infrastructure.Types;
 
 namespace Bijector.Infrastructure.Repositories
@@ -9,14 +10,20 @@ namespace Bijector.Infrastructure.Repositories
     {
         Task<IEnumerable<T>> GetAllAsync();
 
-        Task<IEnumerable<T>> Filter(Func<T, bool> predicate);
+        Task<IEnumerable<T>> FilterAsync(Expression<Func<T, bool>> predicate);
 
-        T Find(Func<T, bool> predicate);
+        Task<T> FindAsync(Expression<Func<T, bool>> predicate);
 
-        T Find(Guid id);
+        Task<T> GetByIdAsync(Guid id);
 
-        void Update(Guid id, T item);
+        Task<bool> IsExistsAsync(Guid id);
 
-        void Remove(Guid id);
+        Task<bool> IsExistsAsync(Expression<Func<T, bool>> predicate);
+
+        Task AddAsync(T item);
+
+        Task UpdateAsync(Guid id, T item);
+
+        Task RemoveAsync(Guid id);
     }
 }
