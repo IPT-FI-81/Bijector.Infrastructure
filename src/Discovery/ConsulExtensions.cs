@@ -33,6 +33,11 @@ namespace Bijector.Infrastructure.Discovery
                 }));
         }
 
+        public static void AddConsulDiscover(this IServiceCollection services)
+        {
+            services.AddTransient<IServiceDiscover, ConsulDiscover>();
+        }
+
         public static void UseConsul(this IApplicationBuilder builder, IHostApplicationLifetime lifetime)
         {
             var client = builder.ApplicationServices.GetService<IConsulClient>();
@@ -40,26 +45,28 @@ namespace Bijector.Infrastructure.Discovery
 
             var features = builder.Properties["server.Features"] as FeatureCollection;
             var addresses = features.Get<IServerAddressesFeature>();
-            var address = addresses.Addresses.First();            
+            var address = addresses.Addresses.First();
 
-            var uri = new Uri(address);            
+            var uri = new Uri(address); 
             var id = $"{config.ServiceName}-{uri.Port}-{Guid.NewGuid()}";
             var tags = config.Tags.Append(config.ServiceName).ToArray();
 
-            /*var check = new AgentServiceCheck()
-            {
-                HTTP = uri.AbsoluteUri + "/health",
-                Interval = new TimeSpan(0,1,0),
+            var check = new AgentServiceCheck()
+            {                
+                HTTP = $"{uri.AbsoluteUri}health/status",
+                Interval = new TimeSpan(0,0,10),
                 Status = HealthStatus.Passing,
                 Timeout = new TimeSpan(0,0,30),
-                DeregisterCriticalServiceAfter = new TimeSpan(0,3,0)
-            };*/
+                TLSSkipVerify = true,
+                DeregisterCriticalServiceAfter = new TimeSpan(0,1,0)
+            };
             
             var registration = new AgentServiceRegistration()
             {
                 ID = id,
                 Name = config.ServiceName,
-                Address = $"{uri.Scheme}://{uri.Host}",
+                
+                Address = $"{uri.Host}",
                 Port = uri.Port,
                 Tags = tags/*,
                 Check = check*/

@@ -5,8 +5,12 @@ namespace Bijector.Infrastructure.Discovery
 {
     public interface IServiceDiscover
     {
-        string ResolveServicePath(string name);        
+        string ResolveServicePath(string name);
 
-        IEnumerable<string> GetActiveServices();
+        IEnumerable<string> GetActiveServices(string name);       
+
+        IDictionary<string, string[]> GetActiveServices();
+
+        IEnumerable<string> GetPathByTag(string tag);
     }
 }
