@@ -21,7 +21,7 @@ namespace Bijector.Infrastructure.Discovery
         public IEnumerable<string> GetActiveServices(string name)
         {            
             return client.Catalog.Service(name).Result.Response
-                .Select((catalog)=>catalog.ServiceAddress);
+                .Select((catalog)=>$"https://{catalog.ServiceAddress}:{catalog.ServicePort}");
         }
 
         public IEnumerable<string> GetPathByTag(string tag)

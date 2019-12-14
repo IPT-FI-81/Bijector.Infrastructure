@@ -48,7 +48,7 @@ namespace Bijector.Infrastructure.Discovery
             var address = addresses.Addresses.First();
 
             var uri = new Uri(address); 
-            var id = $"{config.ServiceName}-{uri.Port}-{Guid.NewGuid()}";
+            var id = $"{config.ServiceName}-{uri.Port}";//-{Guid.NewGuid()}";
             var tags = config.Tags.Append(config.ServiceName).ToArray();
 
             var check = new AgentServiceCheck()
@@ -70,8 +70,8 @@ namespace Bijector.Infrastructure.Discovery
                 Port = uri.Port,
                 Tags = tags/*,
                 Check = check*/
-            };            
-            
+            };                        
+
             client.Agent.ServiceDeregister(id);
             client.Agent.ServiceRegister(registration);
 
