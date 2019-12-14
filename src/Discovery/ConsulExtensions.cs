@@ -21,7 +21,7 @@ namespace Bijector.Infrastructure.Discovery
                 (provider) => new ConsulClient(consulConfig =>
                 {
                     var address = configuration.GetSection("ConsulOptions").GetValue<string>("ConsulAdress");
-                    consulConfig.Address = new Uri(address);                                            
+                    consulConfig.Address = new Uri(address);                                          
                 },
                 (http) => {},
                 (httpHandler) => {
@@ -43,11 +43,11 @@ namespace Bijector.Infrastructure.Discovery
             var client = builder.ApplicationServices.GetService<IConsulClient>();
             var config = builder.ApplicationServices.GetService<IOptions<ConsulOptions>>().Value;
 
-            var features = builder.Properties["server.Features"] as FeatureCollection;
-            var addresses = features.Get<IServerAddressesFeature>();
-            var address = addresses.Addresses.First();
-
-            var uri = new Uri(address); 
+            //var features = builder.Properties["server.Features"] as FeatureCollection;
+            //var addresses = features.Get<IServerAddressesFeature>();
+            //var address = addresses.Addresses.First();
+                        
+            var uri = new Uri(config.ServiceAddress);
             var id = $"{config.ServiceName}-{uri.Port}";//-{Guid.NewGuid()}";
             var tags = config.Tags.Append(config.ServiceName).ToArray();
 

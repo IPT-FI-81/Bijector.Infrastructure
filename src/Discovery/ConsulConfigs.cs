@@ -6,6 +6,8 @@ namespace Bijector.Infrastructure.Discovery
 
         public string[] Tags { get; set; }
 
+        public string ServiceAddress { get; set; }
+
         public string ConsulAdress { get; set; }
 
         public string ConsulUsername { get; set; }
