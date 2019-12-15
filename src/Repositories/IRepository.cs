@@ -14,16 +14,16 @@ namespace Bijector.Infrastructure.Repositories
 
         Task<T> FindAsync(Expression<Func<T, bool>> predicate);
 
-        Task<T> GetByIdAsync(Guid id);
+        Task<T> GetByIdAsync(int id);
 
-        Task<bool> IsExistsAsync(Guid id);
+        Task<bool> IsExistsAsync(int id);
 
         Task<bool> IsExistsAsync(Expression<Func<T, bool>> predicate);
 
         Task AddAsync(T item);
 
-        Task UpdateAsync(Guid id, T item);
+        Task UpdateAsync(int id, T item);
 
-        Task RemoveAsync(Guid id);
+        Task RemoveAsync(int id);
     }
 }

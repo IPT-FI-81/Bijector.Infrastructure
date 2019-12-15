@@ -6,7 +6,7 @@ namespace Bijector.Infrastructure.Types
     
     public class BaseContext : IContext
     {
-        public BaseContext(Guid id, Guid userId, string resourceFrom, string resourceTo)
+        public BaseContext(int id, int userId, string resourceFrom, string resourceTo)
         {
             Id = id;
             UserId = userId;
@@ -16,7 +16,7 @@ namespace Bijector.Infrastructure.Types
         }
 
         [JsonConstructor]
-        public BaseContext(Guid id, Guid userId, string resourceFrom, string resourceTo, DateTimeOffset createdTime)
+        public BaseContext(int id, int userId, string resourceFrom, string resourceTo, DateTimeOffset createdTime)
         {
             Id = id;
             UserId = userId;
@@ -25,9 +25,9 @@ namespace Bijector.Infrastructure.Types
             CreatedTime = createdTime;
         }
 
-        public Guid Id { get; }
+        public int Id { get; }
 
-        public Guid UserId { get; }
+        public int UserId { get; }
 
         public string ResourceFrom { get; }
 

@@ -4,9 +4,9 @@ namespace Bijector.Infrastructure.Types
 {
     public interface IContext
     {
-        Guid Id { get; }
+        int Id { get; }
 
-        Guid UserId { get; }        
+        int UserId { get; }        
 
         string ResourceFrom { get; }
 

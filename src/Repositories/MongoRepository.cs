@@ -19,9 +19,9 @@ namespace Bijector.Infrastructure.Repositories
                 collectionName = typeof(T).Name;
 
             BsonClassMap.RegisterClassMap<T>((map)=>
-            {
-                map.AutoMap();                         
-                map.MapIdProperty(c => c.Id).SetIdGenerator(new GuidGenerator());
+            {                
+                map.AutoMap();
+                map.MapIdProperty(c => c.Id);
             });
 
             collection = database.GetCollection<T>(collectionName);
@@ -47,12 +47,12 @@ namespace Bijector.Infrastructure.Repositories
             return await collection.Find(FilterDefinition<T>.Empty).ToListAsync();
         }
 
-        public async Task<T> GetByIdAsync(Guid id)
-        {
-            return await collection.Find(item => item.Id == id).SingleOrDefaultAsync();
+        public async Task<T> GetByIdAsync(int id)
+        {                                 
+            return await collection.Find(item => item.Id == id).SingleAsync();
         }
 
-        public async Task<bool> IsExistsAsync(Guid id)
+        public async Task<bool> IsExistsAsync(int id)
         {
             return await collection.Find(item => item.Id == id).AnyAsync();
         }
@@ -62,12 +62,12 @@ namespace Bijector.Infrastructure.Repositories
             return await collection.Find(predicate).AnyAsync();
         }
 
-        public async Task RemoveAsync(Guid id)
+        public async Task RemoveAsync(int id)
         {
             await collection.DeleteOneAsync(item => item.Id == id);
         }
 
-        public async Task UpdateAsync(Guid id, T item)
+        public async Task UpdateAsync(int id, T item)
         {            
             await collection.ReplaceOneAsync(old => old.Id == id, item);
         }

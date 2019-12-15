@@ -4,6 +4,6 @@ namespace Bijector.Infrastructure.Types
 {
     public interface IIdentifiable
     {
-         Guid Id { get; }
+         int Id { get; }
     }
 }
