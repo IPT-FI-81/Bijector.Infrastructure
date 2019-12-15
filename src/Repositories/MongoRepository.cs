@@ -16,19 +16,18 @@ namespace Bijector.Infrastructure.Repositories
         public MongoRepository(IMongoDatabase database, string collectionName = null)
         {               
             if(string.IsNullOrEmpty(collectionName))
-                collectionName = typeof(T).Name;
-
-            BsonClassMap.RegisterClassMap<T>((map)=>
-            {                
-                map.AutoMap();
-                map.MapIdProperty(c => c.Id);
-            });
+                collectionName = typeof(T).Name;            
 
             collection = database.GetCollection<T>(collectionName);
         }
 
         public async Task AddAsync(T item)
         {            
+            var accountWithMax = await collection.Find(FilterDefinition<T>.Empty).SortByDescending(t => t.Id).FirstOrDefaultAsync();
+            if(accountWithMax != null)
+                item.Id = accountWithMax.Id + 1;
+            else
+                item.Id = 1;
             await collection.InsertOneAsync(item);
         }
 
