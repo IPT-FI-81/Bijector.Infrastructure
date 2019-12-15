@@ -5,7 +5,7 @@ namespace Bijector.Infrastructure.Types.Messages
         
     }
 
-    public interface IRejectedEvent
+    public interface IRejectedEvent : IEvent
     {
         string Reason { get; }
     }
